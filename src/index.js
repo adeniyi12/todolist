@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const dotenv = require('dotenv')
-const users = require('./users')
+const users = require('./routes/users')
 
 //configure dotenv
 
@@ -19,6 +19,7 @@ app.use(bodyParser.json());
 //configure cors
 app.use(cors({ origin: /http:\/\/localhost/ }))
 app.options('*', cors())
+
 //route config
 
 app.get('/', (req, res)=>{
