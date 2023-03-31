@@ -1,70 +1,9 @@
-const users = require('../routes/users')
+const { validateUserData } = require('../validators/uservalidation')
 const pool = require('../db')
 const bcrypt = require('bcrypt')
 const dotenv = require('dotenv')
 
 dotenv.config()
-
-
-
-const checkDuplicateUsername = (req) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const username = req.body.username
-
-            const conn = await pool.connect()
-            const sql = 'SELECT username from users;'
-            const result = await conn.query(sql)
-            const rows = result.rows
-            conn.release()
-
-            const check = rows.find((user) => {
-                return user.username.trim() === username.trim()
-            })
-
-            resolve(check)
-
-        } catch (error) {
-            reject(error)
-        }
-    })
-
-
-}
-
-const validateUserData = (req) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const username = req.body.username
-            const lastname = req.body.lastname
-            const firstname = req.body.firstname
-            const email = req.body.email
-            const password = req.body.password
-            
-            const requiredKeys = ["username", "password", "firstname", "lastname", "email"]
-
-            for (const key in req.body) {
-                if (!requiredKeys.includes(key)) {
-                    reject(`'${key}' not expected. Field not allowed in request body`);
-                }
-            }
-            
-            if (username.trim() === "" || password.trim() === "" || firstname.trim() === "" || lastname.trim() === "" || email.trim() === "") {
-                reject("Username, password, firstname, lastname and email are required")
-            }
-            else if (await checkDuplicateUsername(req)) {
-                reject("Username already exists")
-            }
-            else {
-                resolve(true)
-            }
-
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
-
 
 
 const createUser = (req) => {
