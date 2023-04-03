@@ -7,7 +7,7 @@ const { validateUserData, authenticateUserLogin } = require('../validators/userv
 const authToken = require('../middlewares/auth')
 
 //get all users
-users.get('/', async (req, res) => {
+users.get('/', authToken, async (req, res) => {
     try {
         const users = await getAllUsers()
         res.json(users)
@@ -21,19 +21,19 @@ users.get('/', async (req, res) => {
 //add a user(signup)
 users.post('/', async (req, res) => {
     try {
-        let result = await createUser(req) //this function will throw an error if a reject object is received so the catch block catches it
+        let result = await createUser(req)
         res.status(201).json(result)
     } catch (error) {
         console.log("Error validating user data:", error);
-        res.status(404).send({ error });;
+        res.status(404).send({ error });
     }
 })
 
 users.post('/login', async (req, res) => {
     try {
         let result = await authenticateUserLogin(req)
-        let token = jwt.sign({ user_id: result }, process.env.TOKEN_SECRET)
-        res.status(200).send({ result })
+        let token = jwt.sign({ user_id: result }, process.env.TOKEN_SECRET, {expiresIn : 3600})
+        res.status(200).send({ result, token })
     } catch (error) {
         console.log("Login Error:", error)
         res.status(401).send({ error });

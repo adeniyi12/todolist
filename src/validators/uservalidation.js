@@ -88,7 +88,7 @@ const authenticateUserLogin = (req) => {
 
                 if (bcrypt.compareSync(password + process.env.BCRYPT_PASSWORD, rows[0].password)) {
 
-                    resolve(`user_id: ${rows[0].user_id}`)
+                    resolve(`${rows[0].user_id}`)
                 }
                 else {
                     reject("Username and/or password do not match")

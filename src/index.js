@@ -3,6 +3,10 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const dotenv = require('dotenv')
 const users = require('./routes/users')
+const todoRoute = require('./routes/todo')
+const taskRoute = require('./routes/task')
+const authToken = require('./middlewares/auth')
+
 
 //configure dotenv
 
@@ -27,6 +31,8 @@ app.get('/', (req, res)=>{
 })
 
 app.use('/users', users)
+app.use('/todo', authToken, todoRoute)
+app.use('/task', authToken, taskRoute)
 
 app.listen(port, ()=>{
     console.log(`server up at http://localhost:${port}/`)
