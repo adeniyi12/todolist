@@ -151,10 +151,12 @@ const searchATask = (req) => {
             }
 
             const conn = await pool.connect()
-            const sql = 'SELECT task.* FROM Task JOIN Todo ON Task.todo_id = Todo.todo_id WHERE Task.name LIKE ($1) AND Todo.user_id = ($2)'
+            const sql = 'SELECT * FROM Task WHERE name LIKE ($1) AND user_id = ($2)'
             const result = await conn.query(sql, [`%${name}%`, user_id])
             const rows = result.rows
             console.log(rows);
+
+            if(!rows) reject("Item not found")
 
             conn.release()
 
