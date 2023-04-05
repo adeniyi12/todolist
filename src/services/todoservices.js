@@ -6,17 +6,24 @@ const createTodo = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             await validatetodoData(req)
-            let user_id = await getUserId(req)
-            const conn = await pool.connect()
-            const sql = `INSERT INTO Todo(name, user_id)
-                    VALUES ($1, $2)
-                    RETURNING *;`;
 
-            const values = [req.body.name, user_id];
-            const result = await conn.query(sql, values)
-            //console.log(result)
-            conn.release()
-            resolve(result.rows[0])
+            const { name, tags } = req.body
+
+            if (!name.trim()) {
+                reject("Name can not be blank")
+            } else {
+                const user_id = await getUserId(req)
+                const conn = await pool.connect()
+                const sql = `INSERT INTO Todo(name, user_id, tags)
+                        VALUES ($1, $2, $3)
+                        RETURNING *;`;
+    
+                const values = [name, user_id, tags || null];
+                const result = await conn.query(sql, values)
+                //console.log(result)
+                conn.release()
+                resolve(result.rows[0]) 
+            }
 
         } catch (error) {
             reject(error)
@@ -70,13 +77,22 @@ const editATodo = (req) => {
         try {
             await validatetodoData(req)
 
-            const { name } = req.body
+            const { name, tags } = req.body
             const { todo_id } = req.params
             const user_id = await getUserId(req)
 
+            let newName = null
+            if (!name) {
+                newName = null
+            } else if (name.trim() === "") {
+                newName = null
+            } else {
+                newName = name.trim()
+            }
+
             const conn = await pool.connect()
-            const sql = 'UPDATE todo SET name = ($1), updated_at=now() WHERE todo_id =($2) AND user_id = ($3) RETURNING *;'
-            const result = await conn.query(sql, [name, todo_id, user_id])
+            const sql = 'UPDATE todo SET name = COALESCE($1, name), tags = COALESCE($2, tags), updated_at=now() WHERE todo_id =($3) AND user_id = ($4) RETURNING *;'
+            const result = await conn.query(sql, [newName, tags, todo_id, user_id])
             console.log(result);
             const rows = result.rows[0]
 

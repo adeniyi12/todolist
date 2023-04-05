@@ -4,8 +4,9 @@ const validatetodoData = (req) => {
     return new Promise((resolve, reject) => {
         try {
             const name = req.body.name
+            const tags = req.body.tags
 
-            const validKey = ["name"]
+            const validKey = ["name", "tags"]
 
             for (const key in req.body) {
                 if (!validKey.includes(key)) {

@@ -1,0 +1,3 @@
+/* Replace with your SQL commands */
+ALTER TABLE IF EXISTS Task
+ADD COLUMN IF NOT EXISTS checked BOOLEAN DEFAULT FALSE;
