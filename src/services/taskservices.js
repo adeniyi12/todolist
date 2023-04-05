@@ -131,8 +131,6 @@ const deleteATask = (req) => {
 
             conn.release()
 
-            console.log(rows)
-
             resolve(rows);
                
 
@@ -142,4 +140,30 @@ const deleteATask = (req) => {
     })
 }
 
-module.exports = { createTask, getAllTask, getATask, editATask, deleteATask }
+const searchATask = (req) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { name } = req.query
+            const user_id = await getUserId(req)
+
+            if (!name) {
+                reject("Name can not be blank")
+            }
+
+            const conn = await pool.connect()
+            const sql = 'SELECT task.* FROM Task JOIN Todo ON Task.todo_id = Todo.todo_id WHERE Task.name LIKE ($1) AND Todo.user_id = ($2)'
+            const result = await conn.query(sql, [`%${name}%`, user_id])
+            const rows = result.rows
+            console.log(rows);
+
+            conn.release()
+
+            resolve(rows)
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+module.exports = { createTask, getAllTask, getATask, editATask, deleteATask, searchATask }
