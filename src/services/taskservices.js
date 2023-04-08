@@ -1,5 +1,6 @@
 const pool = require('../db')
 const jwt = require('jsonwebtoken')
+const moment = require('moment')
 const { getUserId } = require('../validators/todovalidation')
 const { validatetaskData } = require('../validators/taskvalidation')
 
@@ -22,9 +23,11 @@ const createTask = (req) => {
                 reject("completed must be true/false")
             }
 
-            // if (!isValidDate(deadline)) {
-            //     reject("Enter valid date with format YYYY-MM-DD")
-            // }
+            if (deadline !== undefined) {
+                if (!(moment(deadline, 'YYYY-MM-DD', true).isValid())) {
+                    reject('Enter Date format in YYYY-MM-DD');
+                }
+            }
 
             if (!name.trim()) {
                 reject("Name can not be blank")
@@ -123,6 +126,13 @@ const editATask = (req) => {
                 reject("value must either be true of false");
             }
 
+            let newDeadline = deadline === undefined ? null : deadline;
+            if (newDeadline !== null) {
+                if (!(moment(newDeadline, 'YYYY-MM-DD', true).isValid())) {
+                    reject('Enter Date format in YYYY-MM-DD');
+                }
+            }
+
             let validatedPriority = null
             if (!priority) {
                 validatedPriority = null
@@ -135,7 +145,7 @@ const editATask = (req) => {
 
             const conn = await pool.connect()
             const sql = 'UPDATE Task SET name = COALESCE($1, name), checked = COALESCE($2, checked), priority = COALESCE($3, priority), deadline = COALESCE($4, deadline), updated_at=now() WHERE todo_id =($5) AND task_id =($6) AND user_id = ($7) RETURNING *;'
-            const result = await conn.query(sql, [validatedName, completed, validatedPriority, deadline, req.params.todo_id, req.params.task_id, user_id])
+            const result = await conn.query(sql, [validatedName, completed, validatedPriority, newDeadline, req.params.todo_id, req.params.task_id, user_id])
             console.log(result);
             const rows = result.rows[0]
 
