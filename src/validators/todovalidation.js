@@ -27,7 +27,7 @@ const getUserId = (req) => {
         try {
             const jwtToken = req.headers.authorization
             const decodedToken = jwt.decode(jwtToken)
-            console.log(decodedToken);
+            //console.log(decodedToken);
             const user_id = parseInt(decodedToken.user_id)
             //console.log(user_id)
             resolve(user_id)
