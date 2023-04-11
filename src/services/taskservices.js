@@ -1,16 +1,20 @@
+//import all required modules
 const pool = require('../db')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
 const moment = require('moment')
 const { getUserId } = require('../validators/todovalidation')
 const { validatetaskData } = require('../validators/taskvalidation')
 
+//This function allow a logged in user create a task
 const createTask = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
-            await validatetaskData(req)
+            await validatetaskData(req) //this validates if the data passed exists among the required data
 
             const { name, checked, priority, deadline } = req.body
 
+            //This function checks if the priority value passed is valid or sets a default priority level of medium for the task created
             let newPriority = "Medium";
             if (priority !== undefined) {
                 newPriority = priority.trim().charAt(0).toUpperCase() + priority.trim().slice(1);
@@ -19,21 +23,24 @@ const createTask = (req) => {
                 }
             }     
 
+            // This control flow checks if the user passes the right datatype for if the task is completed or not
             if (typeof checked !== "boolean" && checked !== undefined) {
                 reject("completed must be true/false")
             }
 
+            //This control flow only accepts date of the format type YYYY-MM-DD
             if (deadline !== undefined) {
                 if (!(moment(deadline, 'YYYY-MM-DD', true).isValid())) {
                     reject('Enter Date format in YYYY-MM-DD');
                 }
             }
 
+            //This control flow ensures the user gives the created task a name or throw an error
             if (!name.trim()) {
                 reject("Name can not be blank")
             } else {
                 const { todo_id } = req.params
-                const user_id = await getUserId(req)
+                const user_id = await getUserId(req) //this function decodes the user token to get the user id
                 const conn = await pool.connect()
                 const sql = `INSERT INTO Task(name, todo_id, user_id, checked, priority, deadline)
                     VALUES ($1, $2, $3, $4, $5, $6)
@@ -41,7 +48,7 @@ const createTask = (req) => {
 
                 const values = [name.trim(), todo_id, user_id, checked || false, newPriority, deadline || new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)];
                 const result = await conn.query(sql, values)
-                //console.log(result)
+                
                 conn.release()
                 resolve(result.rows[0])
             }
@@ -53,29 +60,29 @@ const createTask = (req) => {
 
 }
 
-
+//This Function gets all task created by a particular user
 const getAllTask = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             const { todo_id } = req.params
             const user_id = await getUserId(req)
-            //const user_id = 3
-            const conn = await pool.connect()
+            
+            const conn = await pool.connect() //connects to the database and perform the required query to get all task created by a user
             const sql = 'SELECT * from Task where todo_id = ($1) AND user_id = ($2);'
             const result = await conn.query(sql, [todo_id, user_id])
             const rows = result.rows
-            //console.log(rows)
-            conn.release()
+            
+            conn.release() //releases the database
 
             resolve(rows)
 
         } catch (error) {
-            reject(error)
+            reject(error) //throws an error if function fails
         }
     })
 }
 
-
+//This Function gets a particular task for a user
 const getATask = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -84,7 +91,7 @@ const getATask = (req) => {
             const sql = 'SELECT * from Task where todo_id = ($1) and task_id = ($2) and user_id = ($3);'
             const result = await conn.query(sql, [req.params.todo_id, req.params.task_id, user_id])
             const rows = result.rows[0]
-            //console.log(rows)
+            
             conn.release()
 
             resolve(rows)
@@ -95,7 +102,7 @@ const getATask = (req) => {
     })
 }
 
-
+//This Function allows user to edit an already existing task
 const editATask = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -164,6 +171,7 @@ const editATask = (req) => {
     })
 }
 
+//This Function allows user to delete a particular task
 const deleteATask = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -188,6 +196,7 @@ const deleteATask = (req) => {
     })
 }
 
+//This Function allows a user to search across all task created 
 const searchATask = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -216,6 +225,7 @@ const searchATask = (req) => {
     })
 }
 
+//This Function allows user to reorder a task based on his desired position
 const reorderATask = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -275,4 +285,26 @@ const reorderATask = (req) => {
     })
 }
 
-module.exports = { createTask, getAllTask, getATask, editATask, deleteATask, searchATask, reorderATask }
+//This Function allows user upload a single file to a created task
+const uploadAFile = (req) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user_id = await getUserId(req)
+
+            const conn = await pool.connect()
+
+            const fileUpload = fs.readFileSync(req.file.path)
+
+            const sql = 'UPDATE Task SET document = ($1), updated_at = NOW() WHERE task_id = ($2) AND todo_id = ($3) AND user_id = ($4)'
+            const result = await conn.query(sql, [fileUpload, req.params.task_id, req.params.todo_id, user_id])
+
+            conn.release()
+
+            resolve("File Uploaded Successfully")
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+module.exports = { createTask, getAllTask, getATask, editATask, deleteATask, searchATask, reorderATask, uploadAFile }

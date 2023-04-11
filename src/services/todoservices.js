@@ -2,6 +2,7 @@ const pool = require('../db')
 const jwt = require('jsonwebtoken')
 const { validatetodoData, getUserId } = require('../validators/todovalidation')
 
+//This Function allows user to create a todo
 const createTodo = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -9,7 +10,7 @@ const createTodo = (req) => {
 
             const { name, tags } = req.body
 
-            if (!name.trim()) {
+            if (!name) {
                 reject("Name can not be blank")
             } else {
                 const user_id = await getUserId(req)
@@ -18,7 +19,7 @@ const createTodo = (req) => {
                         VALUES ($1, $2, $3)
                         RETURNING *;`;
     
-                const values = [name, user_id, tags || null];
+                const values = [name.trim(), user_id, tags || null];
                 const result = await conn.query(sql, values)
                 //console.log(result)
                 conn.release()
@@ -32,11 +33,12 @@ const createTodo = (req) => {
 
 }
 
+//This Function allows a user get all Todo's created
 const getAllTodo = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user_id = await getUserId(req)
-            //const user_id = 3
+            
             const conn = await pool.connect()
             const sql = 'SELECT * from todo where user_id = ($1);'
             const result = await conn.query(sql, [user_id])
@@ -52,6 +54,7 @@ const getAllTodo = (req) => {
     })
 }
 
+//This Function allows user to get a particular todo created
 const getATodo = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -71,7 +74,7 @@ const getATodo = (req) => {
     })
 }
 
-
+//This Function allows user to edit a particular todo created
 const editATodo = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -111,6 +114,7 @@ const editATodo = (req) => {
     })
 }
 
+//This Function allows user delete a particular todo
 const deleteATodo = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -123,7 +127,7 @@ const deleteATodo = (req) => {
             const rows = result.rows
             console.log(rows);
 
-            if(!rows) reject("Todo Item not found")
+            if(!rows.length) reject("Todo Item not found")
 
             conn.release()
 

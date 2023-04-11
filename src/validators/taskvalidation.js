@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 
+//This Function validates data to be parsed in by the user into the Task Table
 const validatetaskData = (req) => {
     return new Promise((resolve, reject) => {
         try {

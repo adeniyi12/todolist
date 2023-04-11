@@ -5,7 +5,7 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
-
+//This Function allows the system sign up a new user
 const createUser = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -33,6 +33,7 @@ const createUser = (req) => {
 
 }
 
+//This function allows the system get all users signed up by the system
 const getAllUsers = () => {
     return new Promise(async (resolve, reject) => {
         try {

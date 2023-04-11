@@ -4,7 +4,7 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
-
+//This Function checks if the username passed in already exists
 const checkDuplicateUsername = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -30,6 +30,7 @@ const checkDuplicateUsername = (req) => {
 
 }
 
+//This Function Validates user data during sign up
 const validateUserData = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -63,6 +64,7 @@ const validateUserData = (req) => {
     })
 }
 
+//This Function authenticates user before Login
 const authenticateUserLogin = (req) => {
     return new Promise(async (resolve, reject) => {
         try {

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 
+//This function validates field to be parsed into the todo table
 const validatetodoData = (req) => {
     return new Promise((resolve, reject) => {
         try {
@@ -21,15 +22,16 @@ const validatetodoData = (req) => {
     })
 }
 
+//This Function decoded the token generated for the user to get the user ID
 const getUserId = (req) => {
 
     return new Promise((resolve, reject) => {
         try {
             const jwtToken = req.headers.authorization
             const decodedToken = jwt.decode(jwtToken)
-            //console.log(decodedToken);
+
             const user_id = parseInt(decodedToken.user_id)
-            //console.log(user_id)
+            
             resolve(user_id)
 
         } catch (error) {

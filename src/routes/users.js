@@ -18,7 +18,7 @@ users.get('/', authToken, async (req, res) => {
     }
 })
 
-//add a user(signup)
+//register a new user (signup)
 users.post('/', async (req, res) => {
     try {
         let result = await createUser(req)
@@ -29,6 +29,7 @@ users.post('/', async (req, res) => {
     }
 })
 
+//login a new registered user and obtain authentication token
 users.post('/login', async (req, res) => {
     try {
         let result = await authenticateUserLogin(req)
@@ -40,4 +41,4 @@ users.post('/login', async (req, res) => {
     }
 })
 
-module.exports = users
+module.exports = users //this export all the user route generated

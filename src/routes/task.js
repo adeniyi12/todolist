@@ -1,7 +1,9 @@
+//import all required module needed
 const express = require('express')
 const taskRoute = express.Router()
 const jwt = require('jsonwebtoken')
-const { createTask, getAllTask, getATask, editATask, deleteATask, searchATask, reorderATask } = require('../services/taskservices')
+const multer = require('multer')
+const { createTask, getAllTask, getATask, editATask, deleteATask, searchATask, reorderATask, uploadAFile } = require('../services/taskservices')
 
 //create a new task in todo for the logged in user
 taskRoute.post('/:todo_id/create', async (req, res) => {
@@ -75,10 +77,24 @@ taskRoute.get('/search', async (req, res) => {
     }
 })
 
-//search for task across all todos owned by a user
+//reorder task across a todo owned by a user
 taskRoute.get('/:todo_id/reorder/:task_id', async (req, res) => {
     try {
         const result = await reorderATask(req)
+        res.json(result)
+
+    } catch (error) {
+        res.status(500).send({ error });
+    }
+})
+
+//upload file for a task across a todos owned by a user
+
+const upload = multer({ dest: 'uploads/' });
+
+taskRoute.patch('/:todo_id/upload/:task_id', upload.single('file'), async (req, res) => {
+    try {
+        const result = await uploadAFile(req)
         res.json(result)
 
     } catch (error) {

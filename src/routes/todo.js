@@ -1,8 +1,9 @@
+//import all required modules
 const express = require('express')
 const todoRoute = express.Router()
 const jwt = require('jsonwebtoken')
 const { createTodo, getAllTodo, getATodo, editATodo, deleteATodo } = require('../services/todoservices')
-//const authToken = require('../middlewares/auth')
+
 
 //create a new todo for the logged in user
 todoRoute.post('/create', async (req, res) => {
@@ -16,6 +17,7 @@ todoRoute.post('/create', async (req, res) => {
     }
 })
 
+//get all todo's for logged in user
 todoRoute.get('/all', async (req, res) => {
     try {
         let result = await getAllTodo(req)
@@ -26,6 +28,7 @@ todoRoute.get('/all', async (req, res) => {
     }
 })
 
+//get a particular todo for a logged in user
 todoRoute.get('/:todo_id', async (req, res) => {
     try {
         let result = await getATodo(req)
