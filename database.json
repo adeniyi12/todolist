@@ -1,9 +1,0 @@
-{
-    "dev":{
-        "driver":"pg",
-        "user":"postgres",
-        "password":"tesla12345",
-        "host":"localhost",
-        "database":"todo"
-    }
-}
